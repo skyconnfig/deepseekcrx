@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Deepseek Assistant</title>
+  <style>
+    body {
+      width: 400px;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .api-key-section {
+      margin-bottom: 20px;
+    }
+    .model-select {
+      margin-bottom: 10px;
+    }
+    .select-input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .api-input {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    #apiKey {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .btn {
+      padding: 8px 16px;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .test-btn {
+      background-color: #2c3e50;
+    }
+    .test-btn:hover {
+      background-color: #34495e;
+    }
+    .save-btn {
+      background-color: #27ae60;
+    }
+    .save-btn:hover {
+      background-color: #219a52;
+    }
+    .api-status {
+      margin-top: 8px;
+      font-size: 0.9em;
+    }
+    .api-status.success {
+      color: #27ae60;
+    }
+    .api-status.error {
+      color: #c0392b;
+    }
+    .history-section {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .qa-item {
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+    .question {
+      font-weight: bold;
+      color: #2c3e50;
+    }
+    .answer {
+      margin-top: 5px;
+      color: #34495e;
+    }
+    .timestamp {
+      font-size: 0.8em;
+      color: #7f8c8d;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="api-key-section">
+      <h3>模型配置</h3>
+      <div class="model-select">
+        <label for="modelType">选择模型:</label>
+        <select id="modelType" class="select-input">
+          <option value="deepseek">Deepseek</option>
+          <option value="local">本地模型</option>
+        </select>
+      </div>
+      <div class="api-input">
+        <input type="password" id="apiKey" placeholder="请输入API Key">
+      </div>
+      <div class="button-group">
+        <button id="testApi" class="btn test-btn">测试API连接</button>
+        <button id="testSql" class="btn test-btn">测试SQL连接</button>
+        <button id="saveConfig" class="btn save-btn">保存配置</button>
+      </div>
+      <div id="apiStatus" class="api-status"></div>
+      <div id="sqlStatus" class="api-status"></div>
+    </div>
+    
+    <div class="history-section">
+      <h3>问答历史</h3>
+      <div id="historyContainer"></div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

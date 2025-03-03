@@ -1,0 +1,148 @@
+# Deepseek Assistant Chrome插件需求文档
+
+## 1. 项目概述
+
+Deepseek Assistant是一个Chrome浏览器插件，用于在浏览网页时快速调用Deepseek API进行问答，并将问答记录保存到SQL Server数据库中。该插件支持右键菜单选择文本进行提问，并提供历史记录查询功能。
+
+## 2. 核心功能需求
+
+### 2.1 浏览器插件功能
+- 使用Node.js技术栈实现Chrome浏览器插件
+- 在浏览器中右键选中文本后，显示"使用Deepseek询问"选项
+- 调用Deepseek API进行问答，并展示回答结果
+- 支持配置API Key和选择模型类型（Deepseek官方API或本地模型）
+- 提供插件弹出窗口(popup)用于配置和查看历史记录
+
+### 2.2 API调用功能
+- 支持调用Deepseek官方API (https://api.deepseek.com)
+- 可选择性支持调用本地模型API
+- 使用用户配置的API Key进行认证
+- 提供API连接测试功能
+
+### 2.3 数据存储功能
+- 将问答记录存储到SQL Server数据库
+- 存储内容包括：问题、回答、时间戳、来源URL、选中文本、使用的模型类型
+- 提供数据库连接测试功能
+- 支持查询历史问答记录
+
+## 3. 技术实现细节
+
+### 3.1 前端实现
+- 使用Chrome Extension Manifest V3规范
+- 使用HTML/CSS/JavaScript实现插件界面
+- 使用Chrome Storage API存储用户配置
+- 使用Chrome Context Menu API实现右键菜单功能
+
+### 3.2 后端实现
+- 使用Express.js框架实现服务器中间层
+- 使用mssql库连接SQL Server数据库
+- 提供RESTful API接口用于数据存储和查询
+- 使用CORS确保浏览器插件可以安全调用API
+
+### 3.3 数据库设计
+- 创建deepseek_qa数据库
+- 设计qa_records表存储问答记录
+- 创建必要的索引提高查询效率
+- 使用全文索引支持问题和回答的搜索功能
+
+## 4. 系统架构
+
+- Chrome插件前端：负责用户交互和API调用
+- Node.js服务器中间层：负责处理数据并与数据库交互
+- SQL Server数据库：负责持久化存储问答数据
+
+## 5. 安装与配置
+
+### 5.1 数据库安装与配置
+- 安装SQL Server（推荐2019或更高版本）
+- 使用SQL Server Management Studio (SSMS)连接到数据库服务器
+- 运行项目中的setup_database.sql脚本创建deepseek_qa数据库和qa_records表
+  ```sql
+  -- 在SSMS中打开setup_database.sql文件并执行，或使用以下命令行
+  sqlcmd -S localhost -i setup_database.sql
+  ```
+
+### 5.2 服务器安装与配置
+- 确保已安装Node.js（推荐v14.0.0或更高版本）
+- 在项目根目录下安装依赖包
+  ```bash
+  npm install
+  ```
+- 如需修改数据库连接配置，编辑server.js文件中的dbConfig对象
+- 启动Node.js服务器
+  ```bash
+  npm start
+  ```
+- 服务器默认运行在http://localhost:3000
+
+### 5.3 Chrome插件安装
+- 打开Chrome浏览器，进入扩展管理页面（chrome://extensions/）
+- 开启右上角的"开发者模式"
+- 点击"加载已解压的扩展程序"按钮
+- 选择项目文件夹（包含manifest.json的目录）
+- 成功加载后，插件图标将显示在Chrome工具栏中
+
+### 5.4 插件配置
+- 点击Chrome工具栏中的Deepseek Assistant图标打开配置页面
+- 在下拉菜单中选择模型类型（Deepseek或本地模型）
+- 输入有效的API Key（可从Deepseek官网获取）
+- 点击"测试API连接"确认API配置正确
+- 点击"测试SQL连接"确认数据库连接正确
+- 点击"保存配置"保存设置
+
+## 6. 使用流程
+
+1. 用户在网页中选中文本
+2. 右键点击，选择"使用Deepseek询问"选项
+3. 插件调用Deepseek API获取回答
+4. 回答结果显示给用户，同时保存到数据库
+5. 用户可通过插件弹出窗口查看历史记录
+
+## 7. 封装与部署
+
+### 7.1 Chrome插件打包
+- 完成开发和测试后，使用Chrome的扩展管理页面进行打包
+- 在扩展管理页面（chrome://extensions/）中点击"打包扩展程序"按钮
+- 选择插件目录（包含manifest.json的文件夹）
+- 生成.crx文件和私钥文件(.pem)
+- 保存私钥文件用于后续更新版本
+- 将.crx文件分发给用户安装
+
+### 7.2 Node.js服务器封装
+- 使用pkg工具将Node.js服务器封装为可执行程序
+  ```bash
+  npm install -g pkg
+  pkg server.js --targets node14-win-x64 --output deepseek-server.exe
+  ```
+- 创建配置文件模板config.json，允许用户修改数据库连接参数
+- 编写批处理脚本启动服务器并设置为Windows服务
+  ```batch
+  @echo off
+  echo 正在启动Deepseek服务器...
+  start /b deepseek-server.exe
+  echo 服务器已启动，请勿关闭此窗口
+  ```
+
+### 7.3 数据库配置自动化
+- 创建数据库安装脚本install_db.bat
+  ```batch
+  @echo off
+  echo 正在配置SQL Server数据库...
+  sqlcmd -S localhost -i setup_database.sql -o sql_output.txt
+  echo 数据库配置完成，请查看sql_output.txt了解详情
+  ```
+- 提供数据库配置验证工具db_verify.js
+- 编写数据库迁移脚本，支持版本升级时的数据迁移
+
+### 7.4 完整安装包制作
+- 创建安装向导（使用NSIS或Inno Setup）
+- 打包所有组件：Chrome插件(.crx)、服务器可执行文件、数据库脚本
+- 设计安装流程：检查环境依赖、安装服务器、配置数据库、安装Chrome插件
+- 提供卸载功能
+
+### 7.5 部署文档
+- 编写详细的部署指南文档
+- 包含系统要求、安装步骤、配置说明
+- 提供常见问题解答(FAQ)和故障排除指南
+- 添加管理员维护指南，包括日志查看、备份恢复等操作说明
+- 提供用户使用手册，详细说明插件的各项功能和使用方法
